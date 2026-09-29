@@ -1,0 +1,26 @@
+# React SPA — Hostinger / LiteSpeed / Apache / nginx front
+# Direct open of /user/login, /panel/login, /lots must serve index.html
+
+DirectoryIndex index.html
+
+<IfModule LiteSpeed>
+  RewriteEngine On
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-l
+  RewriteRule .* /index.html [L]
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-l
+  RewriteRule .* /index.html [L]
+</IfModule>
+
+# Fallback when rewrite modules are off (Hostinger nginx + custom error page)
+ErrorDocument 404 /index.html
+ErrorDocument 403 /index.html

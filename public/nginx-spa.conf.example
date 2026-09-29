@@ -1,0 +1,4 @@
+# Optional nginx snippet (VPS / custom nginx only — Hostinger shared uses .htaccess)
+# location / {
+#   try_files $uri $uri/ /index.html;
+# }

@@ -1,0 +1,70 @@
+{
+  "name": "cloth-hrm",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3",
+    "axios": "^1.9.0",
+    "classnames": "^2.5.1",
+    "exceljs": "^4.4.0",
+    "framer-motion": "^12.15.0",
+    "html2canvas": "^1.4.1",
+    "html5-qrcode": "^2.3.8",
+    "jsbarcode": "^3.12.1",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
+    "jsqr": "^1.4.0",
+    "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.513.0",
+    "moment": "^2.30.1",
+    "qrcode.react": "^4.2.0",
+    "react": "^19.1.0",
+    "react-datepicker": "^7.6.0",
+    "react-dom": "^19.1.0",
+    "react-otp-input": "^3.1.1",
+    "react-qr-reader": "^3.0.0-beta-1",
+    "react-router-dom": "^7.6.1",
+    "react-scripts": "5.0.1",
+    "react-select": "^5.10.1",
+    "react-toastify": "^11.0.5",
+    "react-webcam": "^7.2.0",
+    "socket.io-client": "^4.8.1",
+    "use-scan-detection-react18": "^0.2.3",
+    "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5"
+  },
+  "scripts": {
+    "postinstall": "chmod +x node_modules/.bin/* 2>/dev/null || true",
+    "dev": "sh scripts/dev.sh",
+    "start": "npm run dev",
+    "build": "react-scripts build && sh scripts/postbuild.sh",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}
