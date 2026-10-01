@@ -5,7 +5,7 @@ cd "$(dirname "$0")/.."
 
 if [ ! -d "node_modules" ] || [ ! -f "node_modules/.bin/react-scripts" ]; then
   echo "Installing dependencies..."
-  npm install
+  npm install --legacy-peer-deps
 fi
 
 chmod +x node_modules/.bin/* 2>/dev/null || true

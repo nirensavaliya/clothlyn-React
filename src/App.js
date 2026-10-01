@@ -51,6 +51,10 @@ import SuperAdminPage from "./pages/superAdmin";
 import SuperAdminLoginPage from "./pages/superAdminLogin";
 import Companies from "./pages/companies";
 import CompaniesReport from "./pages/companiesReport";
+import HomePage from "./pages/marketing/HomePage";
+import ServicesPage from "./pages/marketing/ServicesPage";
+import AboutPage from "./pages/marketing/AboutPage";
+import ContactPage from "./pages/marketing/ContactPage";
 
  const isAuthenticated = () => {
   const storedToken = localStorage.getItem('token');
@@ -227,30 +231,10 @@ function App() {
           }
         />
         <Route path="/super-admin/*" element={<SuperAdminProtectedRoute />} />
-        {/* Root route: redirect based on authentication */}
-        <Route
-          path="/"
-          element={
-            isAuthenticated() ? (
-              (() => {
-                let role = null;
-                try {
-                  const user = JSON.parse(localStorage.getItem('user'));
-                  role = user?.accountRole || user?.role;
-                } catch (e) {}
-                if (role === 'user' || role === 'employee') {
-                  return <Navigate to="/user-scan" replace />;
-                }
-                if (role === 'superadmin') {
-                  return <Navigate to="/super-admin" replace />;
-                }
-                return <Navigate to="/lots" replace />;
-              })()
-            ) : (
-              <Navigate to="/user/login" replace />
-            )
-          }
-        />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         {/* User-only routes */}
         <Route
           path="/user/profile"

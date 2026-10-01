@@ -6,7 +6,7 @@ Sitaram React — Hostinger (frontend only)
 3. Keep .htaccess for React Router.
 
 API URL baked at build:
-https://moccasin-alligator-549486.hostingersite.com
+https://200.97.163.242.sslip.io
 
 If phones show "You're offline": clear browser cache / open Incognito once
 after upload. Make sure this React upload was NOT overwritten by Node zip.
