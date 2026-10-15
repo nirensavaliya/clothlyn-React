@@ -100,6 +100,11 @@ export const updateTenantAdmin = async (tenantId, userId, payload) => {
   return response.data;
 };
 
+export const getAppRelease = async () => {
+  const response = await axios.get(`${BASE_URL}/api/app/release`);
+  return response.data;
+};
+
 export const deleteTenantAdmin = async (tenantId, userId) => {
   const response = await axios.delete(
     `${BASE_URL}/api/super-admin/tenants/${tenantId}/admins/${userId}`,

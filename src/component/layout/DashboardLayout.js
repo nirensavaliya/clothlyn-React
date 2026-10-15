@@ -25,6 +25,7 @@ import {
   LucideFileText,
   Building2,
   LucideScan,
+  LucideDownload,
 } from "lucide-react";
 import Button from "../common/Button";
 import Modal from "../common/Modal";
@@ -49,6 +50,7 @@ import LoaderComponent from "../common/Loader";
 import AddUpadModal from "../Upad/AddUpadModal";
 import { useMachines } from '../../contexts/MachineContext';
 import { mapEmployeeToSelectOption } from '../../helpers/utils';
+import { getAppRelease } from '../../apis/superAdminApi';
 
 
 const initialData = [
@@ -123,6 +125,7 @@ const DashboardLayout = ({ children, onAddMachineClick }) => {
   const [upadError, setUpadError] = useState(null);
   const [employees, setEmployees] = useState([]);
   const [isLoadingEmployees, setIsLoadingEmployees] = useState(false);
+  const [appRelease, setAppRelease] = useState(null);
 
   const { refreshMachines } = useMachines();
 
@@ -145,6 +148,22 @@ const DashboardLayout = ({ children, onAddMachineClick }) => {
       setAccountRole(null);
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getAppRelease()
+      .then((body) => {
+        if (cancelled || body?.status !== "success") return;
+        const versionCode = String(body.data?.versionCode || "").trim();
+        const apkUrl = String(body.data?.apkUrl || "").trim();
+        if (!versionCode || !apkUrl) return;
+        setAppRelease({ versionCode, apkUrl });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -962,6 +981,17 @@ const DashboardLayout = ({ children, onAddMachineClick }) => {
                     />
                   </div>
 
+                  <div className="flex items-center gap-3">
+                  {appRelease?.apkUrl ? (
+                    <a
+                      href={appRelease.apkUrl}
+                      className="inline-flex items-center gap-2 rounded-md bg-light-primary px-3 py-2 text-xs font-semibold text-white"
+                    >
+                      <LucideDownload size={16} />
+                      <span className="hidden md:inline">Download APK</span>
+                      <span>v{appRelease.versionCode}</span>
+                    </a>
+                  ) : null}
                   <div
                     className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity duration-200"
                     onClick={handleProfileClick}
@@ -983,6 +1013,7 @@ const DashboardLayout = ({ children, onAddMachineClick }) => {
                 </div>
               </div>
             </div>
+          </div>
           </div>
 
           <div className="relative z-10 flex-1 min-h-0 overflow-y-auto overscroll-y-contain bg-transparent p-4 md:p-6 scrollbar">
