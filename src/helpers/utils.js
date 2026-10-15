@@ -37,6 +37,18 @@ export const formatDate = (date, format = 'DD/MM/YYYY') => {
 };
 
 /** Employee / user object or string → "DisplayName (employeeCode)" when code exists and differs */
+/** True when the value is the logged-in company's client code (e.g. GI1001), not an employee code */
+export const isTenantClientCode = (value) => {
+  const code = String(value || "").trim().toUpperCase();
+  if (!code) return false;
+  let userCode = "";
+  try {
+    userCode = JSON.parse(localStorage.getItem("user") || "null")?.clientCode || "";
+  } catch (e) {}
+  const tenantCode = localStorage.getItem("tenantClientCode") || userCode;
+  return code === String(tenantCode || "").trim().toUpperCase();
+};
+
 export const formatEmployeeDisplayWithCode = (emp) => {
   if (emp == null || emp === "") return "-";
   if (typeof emp === "string") {
@@ -45,7 +57,8 @@ export const formatEmployeeDisplayWithCode = (emp) => {
     if (/^[a-f0-9]{24}$/i.test(t)) return "-";
     return t;
   }
-  const code = String(emp.employeeName || emp.employeeCode || emp.code || "").trim();
+  const rawCode = String(emp.employeeName || emp.employeeCode || emp.code || "").trim();
+  const code = isTenantClientCode(rawCode) ? "" : rawCode;
   const nick = String(emp.nickname || "").trim();
   const user = String(emp.username || "").trim();
   const firstLast = [emp.firstName, emp.lastName].filter(Boolean).join(" ").trim();

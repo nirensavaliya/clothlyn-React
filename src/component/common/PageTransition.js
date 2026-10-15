@@ -39,8 +39,8 @@ export const bundleRowTransition = (index = 0) => ({
   initial: { opacity: 0, y: 14, scale: 0.985 },
   animate: { opacity: 1, y: 0, scale: 1 },
   transition: {
-    duration: 0.28,
-    delay: Math.min(index, 28) * 0.032,
+    duration: 0.2,
+    delay: Math.min(index, 20) * 0.015,
     ease,
   },
 });

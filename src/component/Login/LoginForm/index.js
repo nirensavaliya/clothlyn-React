@@ -19,6 +19,7 @@ const LoginForm = ({
   showBack = true,
   isDefaultTenant = false,
   onOtherClientLogin,
+  platformLogin = false,
 }) => {
   const navigate = useNavigate();
   const handleSubmit = (e) => {
@@ -33,7 +34,7 @@ const LoginForm = ({
   return (
     <div className="">
       <div className="text-center mb-8">
-        <h2 className={loginTitleClass}>Admin</h2>
+        <h2 className={loginTitleClass}>{platformLogin ? "Super Admin" : "Admin"}</h2>
         <div className={loginMutedClass}>
           <p className="mb-1 font-medium text-[#0B1C30]">{tenantLabel}</p>
           <p>Sign in with your admin phone number</p>
@@ -80,27 +81,39 @@ const LoginForm = ({
           />
         </div>
         <div className="text-center mt-4 space-y-2">
-          {isDefaultTenant && onOtherClientLogin && (
-            <div>
-              <button
-                type="button"
-                className={loginLinkClass}
-                onClick={onOtherClientLogin}
-              >
-                Other client login
-              </button>
-            </div>
-          )}
-          <div>
-            <span className="text-sm font-bold text-[#7D766C]">Are you an employee? </span>
+          {platformLogin ? (
             <button
               type="button"
               className={loginLinkClass}
-              onClick={() => navigate("/user/login")}
+              onClick={() => navigate("/panel/login")}
             >
-              Click here
+              Client Admin Login
             </button>
-          </div>
+          ) : (
+            <>
+              {isDefaultTenant && onOtherClientLogin && (
+                <div>
+                  <button
+                    type="button"
+                    className={loginLinkClass}
+                    onClick={onOtherClientLogin}
+                  >
+                    Other client login
+                  </button>
+                </div>
+              )}
+              <div>
+                <span className="text-sm font-bold text-[#7D766C]">Are you an employee? </span>
+                <button
+                  type="button"
+                  className={loginLinkClass}
+                  onClick={() => navigate("/user/login")}
+                >
+                  Click here
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

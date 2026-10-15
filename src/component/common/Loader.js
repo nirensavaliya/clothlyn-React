@@ -59,6 +59,11 @@ const LoaderComponent = ({ size = 72, className = "" }) => {
             );
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
+          animation: clothlyn-overlay-in 0.2s ease-out 0.25s both;
+        }
+        @keyframes clothlyn-overlay-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
         .clothlyn-loader-glow {
           position: absolute;

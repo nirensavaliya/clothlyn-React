@@ -17,7 +17,6 @@ const OTPVerification = ({
   onChange,
   onPrevious,
   onSubmit,
-  otpData,
 }) => {
   const navigate = useNavigate();
 
@@ -50,7 +49,6 @@ const OTPVerification = ({
             <br />
             Number {formData?.phoneNumber}
           </p>
-          <p className="text-sm">Otp {otpData?.otp}</p>
         </div>
       </div>
 

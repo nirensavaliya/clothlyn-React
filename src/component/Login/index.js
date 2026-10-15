@@ -16,7 +16,9 @@ const CLIENT_CODE_PATTERN = /^GI[A-Z0-9]{4}$/i;
 const SUPER_ADMIN_TAP_COUNT = 7;
 const SUPER_ADMIN_TAP_RESET_MS = 3000;
 
-const LoginComponent = () => {
+const PLATFORM_CLIENT_CODE = "GI0000";
+
+const LoginComponent = ({ platformLogin = false }) => {
   const navigate = useNavigate();
   const logoTapRef = useRef({ count: 0, timer: null });
 
@@ -42,8 +44,8 @@ const LoginComponent = () => {
   const [isOtherClientFlow, setIsOtherClientFlow] = useState(false);
   const [currentStep, setCurrentStep] = useState(2);
   const [formData, setFormData] = useState({
-    clientCode: DEFAULT_TENANT_CLIENT_CODE,
-    company: DEFAULT_ADMIN_COMPANY,
+    clientCode: platformLogin ? PLATFORM_CLIENT_CODE : DEFAULT_TENANT_CLIENT_CODE,
+    company: platformLogin ? "Super Admin" : DEFAULT_ADMIN_COMPANY,
     username: "",
     password: "",
     phoneNumber: "",
@@ -276,7 +278,8 @@ const LoginComponent = () => {
             {...commonProps}
             showBack={isOtherClientFlow}
             isDefaultTenant={!isOtherClientFlow}
-            onOtherClientLogin={handleOtherClientLogin}
+            onOtherClientLogin={platformLogin ? undefined : handleOtherClientLogin}
+            platformLogin={platformLogin}
           />
         );
       case 3:

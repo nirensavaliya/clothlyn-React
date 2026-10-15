@@ -37,6 +37,8 @@ const CommonTable = ({
   stripePrimary = true,
   /** Optional: return a Tailwind bg class for a row (overrides zebra). e.g. Complete → light green */
   getRowBgClassName = null,
+  /** Optional: return a Tailwind class for the first cell, e.g. a left status strip */
+  getRowAccentClassName = null,
 }) => {
   const reduceMotion = useReducedMotion();
   const isControlled = controlledOnPageChange !== undefined;
@@ -173,7 +175,11 @@ const CommonTable = ({
                       const highlightClass =
                         typeof customRowBg === 'string'
                           ? customRowBg
-                          : 'bg-[#C8D9C4] group-hover:bg-[#B9CEB4]';
+                          : 'bg-[#E1EBDC] group-hover:bg-[#D5E2CF]';
+                      const rowAccent =
+                        typeof getRowAccentClassName === 'function'
+                          ? getRowAccentClassName(row, rowIndex) || ''
+                          : '';
                       const cellStripe = isItemSelected
                         ? 'bg-[#EFE7DC] group-hover:bg-[#E8DFD4]'
                         : isHighlighted
@@ -194,7 +200,7 @@ const CommonTable = ({
                         >
                           {selectableRows && (
                             <td
-                              className={`${tdClassName} ${cellStripe}`}
+                              className={`${tdClassName} ${cellStripe} ${rowAccent}`}
                               onClick={(e) => e.stopPropagation()}
                             >
                               <input
@@ -208,7 +214,9 @@ const CommonTable = ({
                           {columns.map((column, columnIndex) => (
                             <td
                               key={column.id ? `${column.id}-${rowIndex}` : `${column.accessor || `td-${columnIndex}`}-${rowIndex}`}
-                              className={`${tdClassName} ${cellStripe}`}
+                              className={`${tdClassName} ${cellStripe} ${
+                                columnIndex === 0 && !selectableRows ? rowAccent : ''
+                              }`}
                             >
                               {column.cell ? column.cell(row) : (column.accessor ? row[column.accessor] : 'N/A')}
                             </td>

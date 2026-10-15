@@ -3,7 +3,7 @@ import "./index.css";
 import './style/globle.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Route, Routes, Navigate, useLocation } from "react-router-dom";
+import { Route, Routes, Navigate, Outlet, useLocation } from "react-router-dom";
 import Login from "./pages/login";
 import UserLoginPage from "./pages/userLogin";
 import Lots from "./pages/lots";
@@ -65,6 +65,7 @@ import ContactPage from "./pages/marketing/ContactPage";
   } catch (e) {}
   try {
     const decoded = jwtDecode(token);
+    if (!decoded.authEpoch) return false;
     if (decoded.exp && decoded.exp * 1000 > Date.now()) {
       return true;
     }
@@ -112,7 +113,7 @@ const SuperAdminProtectedRoute = () => {
   return <SuperAdminPage />;
 };
 
-const ProtectedRoute = ({ children, adminOnly, userOnly }) => {
+const ProtectedRoute = ({ adminOnly, userOnly }) => {
   const location = useLocation();
   const token = localStorage.getItem('token');
   let role = null;
@@ -142,7 +143,11 @@ const ProtectedRoute = ({ children, adminOnly, userOnly }) => {
   if (adminOnly && role !== 'admin') {
     return <Navigate to="/user-scan" replace />;
   }
-  return <DashboardLayout>{children}</DashboardLayout>;
+  return (
+    <DashboardLayout>
+      <Outlet />
+    </DashboardLayout>
+  );
 };
 
 function App() {
@@ -236,307 +241,50 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         {/* User-only routes */}
-        <Route
-          path="/user/profile"
-          element={
-            <ProtectedRoute userOnly={true}>
-              <UserProfile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/user-scan"
-          element={
-            <ProtectedRoute userOnly={true}>
-              <Scan />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/user/salary-report"
-          element={
-            <ProtectedRoute userOnly={true}>
-              <UserSalaryReport />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/user/salary-paid"
-          element={
-            <ProtectedRoute userOnly={true}>
-              <UserSalaryPaid />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/user/upad"
-          element={
-            <ProtectedRoute userOnly={true}>
-              <UserUpad />
-            </ProtectedRoute>
-          }
-        />
+        <Route element={<ProtectedRoute userOnly />}>
+          <Route path="/user/profile" element={<UserProfile />} />
+          <Route path="/user-scan" element={<Scan />} />
+          <Route path="/user/salary-report" element={<UserSalaryReport />} />
+          <Route path="/user/salary-paid" element={<UserSalaryPaid />} />
+          <Route path="/user/upad" element={<UserUpad />} />
+        </Route>
         {/* Admin-only routes */}
+        <Route element={<ProtectedRoute adminOnly />}>
+          <Route path="/lots" element={<Lots />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/design" element={<Design />} />
+          <Route path="/admin-scan" element={<AdminScan/>} />
+          <Route path="/upad" element={<Upad />} />
+          <Route path="/salary-report" element={<SalaryReport />} />
+          <Route path="/salary-report-new" element={<SalaryReportNew />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/process" element={<ProcessPage />} />
+          <Route path="/product" element={<Products />} />
+          <Route path="/non-moving-item" element={<NonMovingItem />} />
+          <Route path="/purchase-report" element={<PurchaseReport />} />
+          <Route path="/bill-scan" element={<BillScan />} />
+          <Route path="/finance-manager" element={<FinanceManager />} />
+          <Route path="/employees" element={<Employees />} />
+          <Route path="/report" element={<Report />} />
+          <Route path="/machine" element={<MachinePage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/barcode-label" element={<BarcodeLabelPage />} />
+          <Route path="/alter" element={<Alter />} />
+          <Route path="/alter-count" element={<AlterCount />} />
+          <Route path="/alter-history" element={<AlterHistory />} />
+          <Route path="/reject" element={<Reject />} />
+          <Route path="/salary-master" element={<AccountDetails />} />
+          <Route path="/salary-master-new" element={<SalaryMasterNew />} />
+          <Route path="/product-report" element={<ProductReport />} />
+          <Route path="/companies" element={<Companies />} />
+          <Route path="/company-reports" element={<CompaniesReport />} />
+          <Route path="/salary-paid" element={<SalaryPaid />} />
+          <Route path="/sales-report" element={<SalesReport />} />
+          <Route path="/process/:itemName" element={<ProcessSubItemPage />} />
+        </Route>
         <Route
           path="/dashboard"
           element={<Navigate to="/lots" replace />}
-        />
-        <Route
-          path="/lots"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <Lots />
-            </ProtectedRoute>
-          }
-        />
-    
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/design"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <Design />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin-scan"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <AdminScan/>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/upad"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <Upad />
-            </ProtectedRoute>
-          }
-        />
-        <Route  
-          path="/sales-report"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <SalesReport />
-            </ProtectedRoute>
-          } 
-        />  
-        <Route
-          path="/salary-report"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <SalaryReport />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/salary-report-new"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <SalaryReportNew />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/users"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <Users />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/process"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <ProcessPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/process/:itemName"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <ProcessSubItemPage />
-            </ProtectedRoute>
-          } 
-        /> 
-        <Route
-          path="/product"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <Products />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/non-moving-item"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <NonMovingItem />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/purchase-report"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <PurchaseReport />
-            </ProtectedRoute>
-          }
-        />
-        {/* <Route
-          path="/product-report"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <ProductReport />
-            </ProtectedRoute>
-          }
-        /> */}
-        <Route
-          path="/bill-scan"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <BillScan />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/finance-manager"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <FinanceManager />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/employees"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <Employees />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/report"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <Report />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/machine"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <MachinePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <AdminPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/barcode-label"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <BarcodeLabelPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/alter"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <Alter />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/alter-count"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <AlterCount />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/alter-history"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <AlterHistory />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/reject"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <Reject />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/salary-master"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <AccountDetails />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/salary-master-new"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <SalaryMasterNew />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/product-report"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <ProductReport />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/companies"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <Companies />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/company-reports"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <CompaniesReport />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/salary-paid"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <SalaryPaid />
-            </ProtectedRoute>
-          }
         />
         {/* Default: redirect to user login */}
         <Route path="*" element={<Navigate to="/user/login" replace />} />

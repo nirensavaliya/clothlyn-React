@@ -105,6 +105,17 @@ export const getAppRelease = async () => {
   return response.data;
 };
 
+export const uploadAppRelease = async ({ versionCode, file }) => {
+  const form = new FormData();
+  form.append('versionCode', String(versionCode));
+  if (file) form.append('apk', file);
+  const response = await axios.post(`${BASE_URL}/api/app/release`, form, {
+    headers: getAuthHeaders(),
+  });
+  toast.success(response.data?.message || 'App release updated');
+  return response.data;
+};
+
 export const deleteTenantAdmin = async (tenantId, userId) => {
   const response = await axios.delete(
     `${BASE_URL}/api/super-admin/tenants/${tenantId}/admins/${userId}`,

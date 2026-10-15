@@ -145,9 +145,6 @@ const UserLoginForm = ({
             <p className={loginMutedClass}>
               An OTP has been sent to {otpData?.phoneNumber}.
             </p>
-            {otpData?.otp && (
-              <p className="text-sm mt-2 text-[#0B1C30]">Otp {otpData?.otp}</p>
-            )}
           </>
         )}
       </div>

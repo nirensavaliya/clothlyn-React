@@ -5,6 +5,7 @@ import LoaderComponent from "../component/common/Loader";
 import Modal from "../component/common/Modal";
 import SelectElement from "../component/common/Select";
 import SuperAdminLayout from "../component/layout/SuperAdminLayout";
+import AppUploadForm from "../component/AppUploadForm";
 import {
   createTenant,
   createSuperAdminUser,
@@ -530,6 +531,8 @@ const SuperAdminPage = () => {
           </Modal>
         </div>
       )}
+
+      {activeTab === "app" && <AppUploadForm />}
 
       {activeTab === "users" && (
         <div className="space-y-6">

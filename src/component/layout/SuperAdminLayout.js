@@ -6,6 +6,7 @@ import {
   LucideShield,
   LucideUser,
   LucideUsers,
+  LucideUpload,
 } from "lucide-react";
 import Button from "../common/Button";
 import { logoutApi } from "../../apis/loginApi";
@@ -39,12 +40,14 @@ const SuperAdminLayout = ({ children, activeTab, onTabChange }) => {
     { id: "clients", label: "Client Codes", icon: LucideBuilding2 },
     { id: "employees", label: "User List", icon: LucideUsers },
     { id: "users", label: "Super Admin Users", icon: LucideShield },
+    { id: "app", label: "App Upload", icon: LucideUpload },
   ];
 
   const pageTitles = {
     clients: "Client Codes",
     employees: "User List",
     users: "Super Admin Users",
+    app: "App Upload",
   };
 
   const displayName = user?.username || user?.phoneNumber || "Super Admin";

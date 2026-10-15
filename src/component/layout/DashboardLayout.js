@@ -110,7 +110,13 @@ const DashboardLayout = ({ children, onAddMachineClick }) => {
   const [isAddProcessModalOpen, setIsAddProcessModalOpen] = useState(false);
   const [isAddMachineModalOpen, setIsAddMachineModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [accountRole, setAccountRole] = useState(null);
+  const [accountRole, setAccountRole] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user"))?.employeeRole || null;
+    } catch {
+      return null;
+    }
+  });
   const [data, setData] = useState(initialData);
   const [newMachineName, setNewMachineName] = useState('');
   const [addMachineError, setAddMachineError] = useState(null);
@@ -1010,10 +1016,10 @@ const DashboardLayout = ({ children, onAddMachineClick }) => {
                       </div>
                     </div>
                   </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
           </div>
 
           <div className="relative z-10 flex-1 min-h-0 overflow-y-auto overscroll-y-contain bg-transparent p-4 md:p-6 scrollbar">

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
-import { LucideSearch, LucideUpload, LucideDownload, LucideChevronDown, LucideChevronUp, LucideLoader, LucideScanBarcode, LucideFilter, LucidePrinter, LucidePackageCheck, LucidePlus, Edit, Trash2, Eye, EyeOff, AlertTriangle, LucideArrowLeft } from 'lucide-react';
+import { LucideSearch, LucideUpload, LucideDownload, LucideChevronDown, LucideChevronUp, LucideLoader, LucideScanBarcode, LucideFilter, LucidePrinter, LucidePackageCheck, LucidePlus, LucideCheck, Edit, Trash2, Eye, EyeOff, AlertTriangle, LucideArrowLeft } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { capitalize, formatDate, formatEmployeeDisplayWithCode, lowercase, mapEmployeeToSelectOption, isHiddenScanProcess } from '../helpers/utils';
+import { capitalize, formatDate, formatEmployeeDisplayWithCode, isTenantClientCode, lowercase, mapEmployeeToSelectOption, isHiddenScanProcess } from '../helpers/utils';
 import { importDashboardData, importLegacyScans, exportDashboardData, searchDashboard, generateLabels, getUniqueColors, getUniqueSizes, updateDashboard, deleteDashboard, getLastExcelImportBatch } from '../apis/dashboardApi';
 import InputElement from '../component/common/InputElement';
 import SelectElement from '../component/common/Select';        
@@ -281,7 +281,7 @@ const Lots = () => {
   const [currentPage, setCurrentPage] = useState(1);      
   const [currentLimit, setCurrentLimit] = useState(25);   
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(true);
   const [importLoading, setImportLoading] = useState(false);
   const [legacyImportLoading, setLegacyImportLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
@@ -1739,13 +1739,14 @@ const handleLegacyImport = async (event) => {
       cell: (row) => {
         if (row?.lastProcess && typeof row.lastProcess === "object") {
           const lastProcessName = String(row.lastProcess.name || "").trim();
-          const lastProcessCode = String(row.lastProcess.employeeCode || "").trim();
+          const rawLastProcessCode = String(row.lastProcess.employeeCode || "").trim();
+          const lastProcessCode = isTenantClientCode(rawLastProcessCode) ? "" : rawLastProcessCode;
           if (lastProcessName && lastProcessCode) return `${lastProcessName} (${lastProcessCode})`;
           if (lastProcessName) return lastProcessName;
           if (lastProcessCode) return lastProcessCode;
         }
         if (row.last_process_nickname) {
-          const code = row.last_process_employeeName;
+          const code = isTenantClientCode(row.last_process_employeeName) ? "" : row.last_process_employeeName;
           if (code && String(row.last_process_nickname).trim() !== String(code).trim()) {
             return `${row.last_process_nickname} (${code})`;
           }
@@ -1783,12 +1784,27 @@ const handleLegacyImport = async (event) => {
     }
     },
     {
-      header: <SortableTableHeader label="Status" sortKey="status" />,
+      header: (
+        <div className="flex w-full items-center justify-center">
+          <SortableTableHeader label="Status" sortKey="status" />
+        </div>
+      ),
       // cell: (row) => row.status ? <Status status={lowercase(row.status) === 'loading' ? "unloading" : lowercase(row.status)} /> : "-"
       cell: (row) => {
         const status = row.currentStatus || row.status || "";
-        if (lowercase(status) === 'done' || lowercase(status) === 'complete') return "Complete";
-        return capitalize(status) || "-";
+        const isComplete = lowercase(status) === 'done' || lowercase(status) === 'complete';
+        return (
+          <div className="flex justify-center">
+            {isComplete ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-[#BFD4BA] bg-[#E6F0E2] px-2.5 py-0.5 text-xs font-semibold text-[#2F6B3A]">
+                <LucideCheck size={12} strokeWidth={3} />
+                Complete
+              </span>
+            ) : (
+              capitalize(status) || "-"
+            )}
+          </div>
+        );
       }
     },
     {
@@ -2568,6 +2584,7 @@ const handleLegacyImport = async (event) => {
         <CommonTable
           columns={columns}
           data={dashboardData.records}
+          loading={loading && !dashboardData.records?.length}
           count={dashboardData.pagination.total}
           page={currentPage - 1}
           rowsPerPage={currentLimit}
@@ -2584,12 +2601,12 @@ const handleLegacyImport = async (event) => {
           onSelectedRowsChange={handleSelectedRowsChange}
           uniqueRowIdentifier="_id"
           stripePrimary={true}
-          getRowBgClassName={(row) => {
+          getRowAccentClassName={(row) => {
             const status = lowercase(row.currentStatus || row.status || "");
             if (status === "done" || status === "complete") {
-              return "bg-[#C8D9C4] group-hover:bg-[#B9CEB4]";
+              return "relative before:absolute before:inset-y-0 before:left-0 before:w-2 before:rounded-l-[3px] before:border-l-4 before:border-[#4E8F5B] before:content-['']";
             }
-            return false;
+            return "";
           }}
         />
       </div>
