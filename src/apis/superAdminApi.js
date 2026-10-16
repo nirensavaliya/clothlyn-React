@@ -4,6 +4,14 @@ import { getAuthHeaders } from '../utils/authToken';
 
 const BASE_URL = process.env.REACT_APP_BASE_URL;
 
+export const listOtpLogs = async ({ page = 1, limit = 50, search = '' } = {}) => {
+  const response = await axios.get(`${BASE_URL}/api/super-admin/otp-logs`, {
+    headers: getAuthHeaders(),
+    params: { page, limit, ...(search ? { search } : {}) },
+  });
+  return response.data;
+};
+
 export const listTenants = async () => {
   const response = await axios.get(`${BASE_URL}/api/super-admin/tenants`, {
     headers: getAuthHeaders(),
@@ -57,6 +65,21 @@ export const createSuperAdminUser = async (payload) => {
   return response.data;
 };
 
+export const updateSuperAdminUserStatus = async (userId, status) => {
+  try {
+    const response = await axios.patch(
+      `${BASE_URL}/api/super-admin/users/${userId}/status`,
+      { status },
+      { headers: getAuthHeaders() }
+    );
+    toast.success(response.data?.message || 'Status updated');
+    return response.data;
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Status update failed');
+    throw error;
+  }
+};
+
 export const deleteSuperAdminUser = async (userId) => {
   const response = await axios.delete(
     `${BASE_URL}/api/super-admin/users/${userId}`,
@@ -75,6 +98,20 @@ export const listTenantAdmins = async (tenantId) => {
     return response.data;
   } catch (error) {
     const msg = error.response?.data?.message || 'Failed to load admin users';
+    toast.error(msg);
+    throw error;
+  }
+};
+
+export const listTenantEmployees = async (tenantId) => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/api/super-admin/tenants/${tenantId}/employees`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  } catch (error) {
+    const msg = error.response?.data?.message || 'Failed to load employees';
     toast.error(msg);
     throw error;
   }

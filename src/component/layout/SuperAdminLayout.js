@@ -7,6 +7,7 @@ import {
   LucideUser,
   LucideUsers,
   LucideUpload,
+  LucideKeyRound,
 } from "lucide-react";
 import Button from "../common/Button";
 import { logoutApi } from "../../apis/loginApi";
@@ -41,6 +42,7 @@ const SuperAdminLayout = ({ children, activeTab, onTabChange }) => {
     { id: "employees", label: "User List", icon: LucideUsers },
     { id: "users", label: "Super Admin Users", icon: LucideShield },
     { id: "app", label: "App Upload", icon: LucideUpload },
+    { id: "otp", label: "OTP Logs", icon: LucideKeyRound },
   ];
 
   const pageTitles = {
@@ -48,6 +50,7 @@ const SuperAdminLayout = ({ children, activeTab, onTabChange }) => {
     employees: "User List",
     users: "Super Admin Users",
     app: "App Upload",
+    otp: "OTP Logs",
   };
 
   const displayName = user?.username || user?.phoneNumber || "Super Admin";

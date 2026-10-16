@@ -265,10 +265,10 @@ const UserLoginForm = ({
           />
           <div className="flex items-center gap-2 max-[390px]:flex-col">
             <Button
-              variant="secondary"
+              variant="outline"
               size="large"
               label="Resend OTP"
-              className="w-full focus:!ring-0 !py-3 !px-4 !rounded-xl !text-[#7D766C] !border-[#CFC5B9]"
+              className="w-full focus:!ring-0 !py-3 !px-4 !rounded-xl !text-base whitespace-nowrap !bg-white hover:!bg-[#F5F1EB] !text-[#7D766C] !border-[#CFC5B9]"
               onClick={handleSendOtp}
               loading={isOtpLoading}
               disabled={isOtpLoading}
@@ -277,7 +277,7 @@ const UserLoginForm = ({
               variant="primary"
               size="large"
               label="Login"
-              className={`${loginPrimaryBtnClass} focus:!ring-0`}
+              className={`${loginPrimaryBtnClass} focus:!ring-0 !text-base whitespace-nowrap`}
               onClick={handleLogin}
               loading={isLoginLoading}
               disabled={isLoginLoading || !otp || otp.length !== 6}

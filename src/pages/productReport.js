@@ -714,6 +714,19 @@ const ProductReport = () => {
                         numeric &&
                         !isZero;
 
+                    if (String(fieldName).toLowerCase() === 'billscan') {
+                        return (
+                            <span
+                                className={`font-semibold text-[#B45309] ${canClick ? "cursor-pointer hover:underline" : ""}`}
+                                onClick={() => {
+                                    if (canClick) handleProcessCellClick(fieldName, row);
+                                }}
+                            >
+                                {value}
+                            </span>
+                        );
+                    }
+
                     return (
                         <span
                             className={
@@ -739,7 +752,7 @@ const ProductReport = () => {
             accessor: "total",
             cell: (row) => {
                 const value = row.isTotalRow ? (row.total || '0(0)') : formatCellValue(row.total);
-                return <span className="font-semibold text-[#7D766C]">{value}</span>;
+                return <span className="font-semibold text-[#1E3A8A]">{value}</span>;
             }
         });
         
@@ -748,7 +761,7 @@ const ProductReport = () => {
             accessor: "completed",
             cell: (row) => {
                 const value = row.isTotalRow ? (row.completed || '0(0)') : formatCellValue(row.completed);
-                return <span className="font-semibold text-[#3D5C3A]">{value}</span>;
+                return <span className="font-semibold text-[#15803D]">{value}</span>;
             }
         });
         
@@ -777,7 +790,7 @@ const ProductReport = () => {
                 />
 
                 <div className="flex items-center justify-between gap-3 !mt-0 max-sm:flex-col max-sm:items-stretch">
-                    <div>
+                    <div className="text-left">
                         <h1 className="text-2xl font-bold text-[#0B1C30] font-roboto cursor-default shrink-0">
                             Product Report
                         </h1>

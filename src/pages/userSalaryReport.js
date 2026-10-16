@@ -34,88 +34,14 @@ const UserSalaryReport = () => {
 
     // Filter states
     const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const [appliedFilters, setAppliedFilters] = useState({
-        employeeName: '',
-        lotNo: '',
-        dNo: '',
-        pic: '',
-        startDate: '',
-        endDate: ''
-    });
-    const [tempFilters, setTempFilters] = useState({
-        employeeName: '',
-        lotNo: '',
-        dNo: '',
-        pic: '',
-        startDate: '',
-        endDate: ''
-    });
+    const emptyFilters = { startDate: '', endDate: '' };
+    const [appliedFilters, setAppliedFilters] = useState(emptyFilters);
+    const [tempFilters, setTempFilters] = useState(emptyFilters);
 
     usePageTitle('User Salary Report');
 
-    // Filter options
-    const [employeeOptions, setEmployeeOptions] = useState([]);
-    const [lotNoOptions, setLotNoOptions] = useState([]);
-    const [dNoOptions, setDNoOptions] = useState([]);
-    const [picOptions, setPicOptions] = useState([]);
-    const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
-
     const filterRef = useRef(null);
     const user = JSON.parse(localStorage.getItem('user'));
-
-    const getAllFilterOptions = async () => {
-        try {
-            setFilterOptionsLoading(true);
-            const response = await getUserSalaryReport({
-                userId: user?._id,
-                isExcel: false,
-                limit: 1000 // Get more data to extract options
-            });
-            
-            if (response && response.data && response.data.length > 0) {
-                const employees = new Set();
-                const lotNos = new Set();
-                const dNos = new Set();
-                const pics = new Set();
-                
-                response.data.forEach(item => {
-                    // Employee names
-                    const firstName = item?.user?.firstName || '';
-                    const lastName = item?.user?.lastName || '';
-                    const fullName = `${firstName} ${lastName}`.trim();
-                    if (fullName) employees.add(fullName);
-
-                    // Lot numbers
-                    if (item.lotNo) lotNos.add(item.lotNo);
-
-                    // D numbers
-                    if (item.dNo) dNos.add(item.dNo);
-
-                    // Pics
-                    if (item.pic) pics.add(item.pic.toString());
-                });
-
-                setEmployeeOptions(Array.from(employees).map(name => ({ value: name, label: name })));
-                setLotNoOptions(Array.from(lotNos).map(lotNo => ({ value: lotNo, label: lotNo })));
-                setDNoOptions(Array.from(dNos).map(dNo => ({ value: dNo, label: dNo })));
-                setPicOptions(Array.from(pics).map(pic => ({ value: pic, label: pic })));
-            } else {
-                // If no data, set empty options but don't show error
-                setEmployeeOptions([]);
-                setLotNoOptions([]);
-                setDNoOptions([]);
-                setPicOptions([]);
-            }
-        } catch (error) {
-            console.error('Error fetching filter options:', error);
-            setEmployeeOptions([]);
-            setLotNoOptions([]);
-            setDNoOptions([]);
-            setPicOptions([]);
-        } finally {
-            setFilterOptionsLoading(false);
-        }
-    };
 
     const fetchSalaryData = async () => {
         try {
@@ -125,10 +51,6 @@ const UserSalaryReport = () => {
                 userId: user?._id,
                 limit: currentLimit,
                 page: currentPage + 1,
-                employeeName: appliedFilters.employeeName,
-                lotNo: appliedFilters.lotNo,
-                dNo: appliedFilters.dNo,
-                pic: appliedFilters.pic,
                 startDate: appliedFilters.startDate,
                 endDate: appliedFilters.endDate
             });
@@ -151,18 +73,6 @@ const UserSalaryReport = () => {
         }
     };
 
-    // Function to refresh filter options
-    const refreshFilterOptions = async () => {
-        // Only refresh if we don't already have options
-        if (employeeOptions.length === 0 && lotNoOptions.length === 0 && dNoOptions.length === 0 && picOptions.length === 0) {
-            await getAllFilterOptions();
-        }
-    };
-
-    useEffect(() => {
-        getAllFilterOptions(); // Fetch all options on mount
-    }, []);
-
     useEffect(() => {
         fetchSalaryData();
     }, [currentPage, currentLimit, searchQuery, appliedFilters]);
@@ -180,8 +90,6 @@ const UserSalaryReport = () => {
     const handleFilterClick = () => {
         if (!isFilterOpen) {
             setTempFilters(appliedFilters);
-            // Only refresh options if we don't have them
-            refreshFilterOptions();
         }
         setIsFilterOpen(!isFilterOpen);
     };
@@ -196,21 +104,10 @@ const UserSalaryReport = () => {
     };
 
     const handleClearFilter = () => {
-        const clearedFilters = {
-            employeeName: '',
-            lotNo: '',
-            dNo: '',
-            pic: '',
-            startDate: '',
-            endDate: ''
-        };
-        setAppliedFilters(clearedFilters);
-        setTempFilters(clearedFilters);
+        setAppliedFilters(emptyFilters);
+        setTempFilters(emptyFilters);
         setCurrentPage(0);
         setIsFilterOpen(false);
-        
-        // After clearing filters, ensure we have fresh options
-        refreshFilterOptions();
     };
 
     const handleTempFilterChange = (field, value) => {
@@ -221,15 +118,11 @@ const UserSalaryReport = () => {
     };
 
     const isAnyFilterApplied = () => {
-        return appliedFilters.employeeName || appliedFilters.lotNo || appliedFilters.dNo || appliedFilters.pic || appliedFilters.startDate || appliedFilters.endDate;
+        return appliedFilters.startDate || appliedFilters.endDate;
     };
 
     const getActiveFilterCount = () => {
         let count = 0;
-        if (appliedFilters.employeeName) count++;
-        if (appliedFilters.lotNo) count++;
-        if (appliedFilters.dNo) count++;
-        if (appliedFilters.pic) count++;
         if (appliedFilters.startDate) count++;
         if (appliedFilters.endDate) count++;
         return count;
@@ -343,11 +236,6 @@ const UserSalaryReport = () => {
                             appliedFilters={appliedFilters}
                             tempFilters={tempFilters}
                             onTempFilterChange={handleTempFilterChange}
-                            employeeOptions={employeeOptions}
-                            lotNoOptions={lotNoOptions}
-                            dNoOptions={dNoOptions}
-                            picOptions={picOptions}
-                            filterOptionsLoading={filterOptionsLoading}
                         />
                     </div>
                 </div>

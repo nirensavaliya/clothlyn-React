@@ -1793,12 +1793,17 @@ const handleLegacyImport = async (event) => {
       cell: (row) => {
         const status = row.currentStatus || row.status || "";
         const isComplete = lowercase(status) === 'done' || lowercase(status) === 'complete';
+        const isBillscan = lowercase(status) === 'billscan';
         return (
           <div className="flex justify-center">
             {isComplete ? (
               <span className="inline-flex items-center gap-1 rounded-full border border-[#BFD4BA] bg-[#E6F0E2] px-2.5 py-0.5 text-xs font-semibold text-[#2F6B3A]">
                 <LucideCheck size={12} strokeWidth={3} />
                 Complete
+              </span>
+            ) : isBillscan ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-[#F3D3A8] bg-[#FDF0DF] px-2.5 py-0.5 text-xs font-semibold text-[#B45309]">
+                Billscan
               </span>
             ) : (
               capitalize(status) || "-"
@@ -2605,6 +2610,9 @@ const handleLegacyImport = async (event) => {
             const status = lowercase(row.currentStatus || row.status || "");
             if (status === "done" || status === "complete") {
               return "relative before:absolute before:inset-y-0 before:left-0 before:w-2 before:rounded-l-[3px] before:border-l-4 before:border-[#4E8F5B] before:content-['']";
+            }
+            if (status === "billscan") {
+              return "relative before:absolute before:inset-y-0 before:left-0 before:w-2 before:rounded-l-[3px] before:border-l-4 before:border-[#B45309] before:content-['']";
             }
             return "";
           }}

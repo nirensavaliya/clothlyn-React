@@ -15,6 +15,7 @@ export const getUserSalaryReport = async ({
   lotNo = '',
   dNo = '',
   pic = '',
+  status = '',
   startDate = '',
   endDate = ''
 } = {}) => {
@@ -29,6 +30,7 @@ export const getUserSalaryReport = async ({
     if (lotNo) params.lotNo = lotNo;
     if (dNo) params.dNo = dNo;
     if (pic) params.pic = pic;
+    if (status) params.status = status;
     if (startDate) params.startDate = startDate;
     if (endDate) params.endDate = endDate;
     

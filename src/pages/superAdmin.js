@@ -6,15 +6,18 @@ import Modal from "../component/common/Modal";
 import SelectElement from "../component/common/Select";
 import SuperAdminLayout from "../component/layout/SuperAdminLayout";
 import AppUploadForm from "../component/AppUploadForm";
+import OtpLogs from "../component/OtpLogs";
 import {
   createTenant,
   createSuperAdminUser,
   createTenantAdmin,
   deleteSuperAdminUser,
+  updateSuperAdminUserStatus,
   deleteTenant,
   deleteTenantAdmin,
   listTenants,
   listTenantAdmins,
+  listTenantEmployees,
   listSuperAdminUsers,
   updateTenant,
   updateTenantAdmin,
@@ -31,8 +34,8 @@ const emptyAdminForm = {
 const cardClass =
   "bg-[#F9F6F1] rounded-2xl border border-[#E8DFD4] shadow-[0_8px_24px_-12px_rgba(75,68,58,0.18)]";
 const tableWrapClass = `${cardClass} overflow-hidden`;
-const thClass = "px-2 py-1.5 font-semibold text-[11px] uppercase tracking-wider text-[#0B1C30]";
-const tdClass = "px-2 py-1.5 text-[13px] leading-tight text-[#4C463D] h-9";
+const thClass = "px-2 py-1.5 text-left font-semibold text-[11px] uppercase tracking-wider text-[#0B1C30]";
+const tdClass = "px-2 py-1.5 text-left text-[13px] leading-tight text-[#4C463D] h-9";
 const primaryBtnClass =
   "!bg-[#7D766C] hover:!bg-[#6A645C] !text-white !rounded-xl !shadow-[0_8px_16px_-8px_rgba(197,179,150,0.35)] focus:!ring-[#C5B396]";
 const outlineBtnClass = primaryBtnClass;
@@ -44,6 +47,7 @@ const SuperAdminPage = () => {
   const [platformUsers, setPlatformUsers] = useState([]);
   const [selectedTenantId, setSelectedTenantId] = useState(null);
   const [tenantAdmins, setTenantAdmins] = useState([]);
+  const [tenantEmployees, setTenantEmployees] = useState([]);
   const [adminsLoading, setAdminsLoading] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editForm, setEditForm] = useState(emptyAdminForm);
@@ -127,6 +131,29 @@ const SuperAdminPage = () => {
     }
   };
 
+  const currentUserId = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "{}")?._id || null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const handleToggleStaffStatus = async (staff) => {
+    const nextStatus = staff.status === "inactive" ? "active" : "inactive";
+    if (
+      nextStatus === "inactive" &&
+      !window.confirm(`Deactivate super admin "${staff.username || staff.phoneNumber}"?`)
+    )
+      return;
+    try {
+      await updateSuperAdminUserStatus(staff._id, nextStatus);
+      await loadData();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleDeleteStaff = async (userId) => {
     if (!window.confirm("Delete this super admin user?")) return;
     try {
@@ -148,19 +175,41 @@ const SuperAdminPage = () => {
   const loadTenantAdmins = async (tenantId) => {
     if (!tenantId) {
       setTenantAdmins([]);
+      setTenantEmployees([]);
       return;
     }
     setAdminsLoading(true);
-    try {
-      const res = await listTenantAdmins(tenantId);
-      setTenantAdmins(res?.data || []);
-    } catch (error) {
-      console.error(error);
-      setTenantAdmins([]);
-    } finally {
-      setAdminsLoading(false);
-    }
+    const [adminsRes, employeesRes] = await Promise.allSettled([
+      listTenantAdmins(tenantId),
+      listTenantEmployees(tenantId),
+    ]);
+    setTenantAdmins(adminsRes.status === "fulfilled" ? adminsRes.value?.data || [] : []);
+    setTenantEmployees(
+      employeesRes.status === "fulfilled" ? employeesRes.value?.data || [] : []
+    );
+    setAdminsLoading(false);
   };
+
+  const adminIds = new Set(tenantAdmins.map((admin) => String(admin._id)));
+  const tenantUserRows = [
+    ...tenantAdmins.map((admin) => ({ ...admin, rowType: "admin" })),
+    ...tenantEmployees
+      .filter((emp) => !adminIds.has(String(emp._id)))
+      .map((emp) => {
+        const fullName = [emp.firstName, emp.lastName].filter(Boolean).join(" ").trim();
+        const name = emp.nickname || fullName || emp.employeeName || "-";
+        return {
+          _id: emp._id,
+          username:
+            emp.employeeName && emp.employeeName !== name
+              ? `${name} (${emp.employeeName})`
+              : name,
+          phoneNumber: emp.mobileNumber,
+          status: emp.status || "active",
+          rowType: "employee",
+        };
+      }),
+  ];
 
   const handleTenantSelect = (tenantId) => {
     setSelectedTenantId(tenantId || null);
@@ -412,7 +461,7 @@ const SuperAdminPage = () => {
             <p
               className={`p-6 text-center text-[#7D766C] ${cardClass}`}
             >
-              Select a client code to view admin users
+              Select a client code to view admin and employee users
             </p>
           ) : (
             <div className={tableWrapClass}>
@@ -420,18 +469,30 @@ const SuperAdminPage = () => {
                 <thead className="bg-[#EFE7DC] border-b border-[#E8DFD4]">
                   <tr className="text-left">
                     <th className={thClass}>Username</th>
+                    <th className={thClass}>Role</th>
                     <th className={thClass}>Phone</th>
                     <th className={thClass}>Status</th>
                     <th className={thClass}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {tenantAdmins.map((admin) => (
+                  {tenantUserRows.map((admin) => (
                     <tr
-                      key={admin._id}
+                      key={`${admin.rowType}-${admin._id}`}
                       className="border-b border-[#E8DFD4] hover:bg-[#F3EEE7]"
                     >
                       <td className={tdClass}>{admin.username || "-"}</td>
+                      <td className={tdClass}>
+                        <span
+                          className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
+                            admin.rowType === "admin"
+                              ? "bg-[#EFE7DC] text-[#7D766C]"
+                              : "bg-[#F3EEE7] text-[#4C463D]"
+                          }`}
+                        >
+                          {admin.rowType === "admin" ? "Admin" : "Employee"}
+                        </span>
+                      </td>
                       <td className={tdClass}>{admin.phoneNumber || "-"}</td>
                       <td className={tdClass}>
                         <span
@@ -445,30 +506,34 @@ const SuperAdminPage = () => {
                         </span>
                       </td>
                       <td className={tdClass}>
-                        <div className="flex gap-2 flex-wrap">
-                          <Button
-                            variant="primary"
-                            size="small"
-                            label="Edit"
-                            onClick={() => openEditModal(admin)}
-                            className={outlineBtnClass}
-                          />
-                          <Button
-                            variant="primary"
-                            size="small"
-                            label="Delete"
-                            onClick={() => handleDeleteAdmin(admin)}
-                            className={outlineBtnClass}
-                          />
-                        </div>
+                        {admin.rowType === "admin" ? (
+                          <div className="flex gap-2 flex-wrap">
+                            <Button
+                              variant="primary"
+                              size="small"
+                              label="Edit"
+                              onClick={() => openEditModal(admin)}
+                              className={outlineBtnClass}
+                            />
+                            <Button
+                              variant="primary"
+                              size="small"
+                              label="Delete"
+                              onClick={() => handleDeleteAdmin(admin)}
+                              className={outlineBtnClass}
+                            />
+                          </div>
+                        ) : (
+                          <span className="text-[#7D766C]">-</span>
+                        )}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {tenantAdmins.length === 0 && (
+              {tenantUserRows.length === 0 && (
                 <p className="p-6 text-center text-[#7D766C]">
-                  No admin users found for {selectedTenantLabel}
+                  No users found for {selectedTenantLabel}
                 </p>
               )}
             </div>
@@ -533,6 +598,7 @@ const SuperAdminPage = () => {
       )}
 
       {activeTab === "app" && <AppUploadForm />}
+      {activeTab === "otp" && <OtpLogs />}
 
       {activeTab === "users" && (
         <div className="space-y-6">
@@ -589,15 +655,38 @@ const SuperAdminPage = () => {
                   >
                     <td className={tdClass}>{u.username || "-"}</td>
                     <td className={tdClass}>{u.phoneNumber}</td>
-                    <td className={tdClass}>{u.status || "active"}</td>
                     <td className={tdClass}>
-                      <Button
-                        variant="primary"
-                        size="small"
-                        label="Delete"
-                        onClick={() => handleDeleteStaff(u._id)}
-                        className={outlineBtnClass}
-                      />
+                      <span
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
+                          u.status === "inactive"
+                            ? "bg-[#F5E8E6] text-[#8B3A32]"
+                            : "bg-[#E8F0E6] text-[#3D5C3A]"
+                        }`}
+                      >
+                        {u.status === "inactive" ? "Inactive" : "Active"}
+                      </span>
+                    </td>
+                    <td className={tdClass}>
+                      {String(u._id) === String(currentUserId) ? (
+                        <span className="text-xs text-[#7D766C]">You</span>
+                      ) : (
+                        <div className="flex gap-2 flex-wrap">
+                          <Button
+                            variant="primary"
+                            size="small"
+                            label={u.status === "inactive" ? "Activate" : "Deactivate"}
+                            onClick={() => handleToggleStaffStatus(u)}
+                            className={outlineBtnClass}
+                          />
+                          <Button
+                            variant="primary"
+                            size="small"
+                            label="Delete"
+                            onClick={() => handleDeleteStaff(u._id)}
+                            className={outlineBtnClass}
+                          />
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
