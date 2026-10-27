@@ -34,9 +34,16 @@ const PoweredBy = ({ className = "" }) => (
  * Website login layout themed with Figma mobile app colors
  * (navy / taupe / gold / cream) — Clothlyn brand + Gelai powered-by.
  */
-const LoginPageShell = ({ children, onBrandTap }) => {
+const LoginPageShell = ({ children, onBrandTap, onIllustrationTap, showLocalBadge = false }) => {
   return (
     <div className="relative min-h-screen">
+      {showLocalBadge && (
+        <div className="fixed top-3 left-1/2 z-50 -translate-x-1/2 pointer-events-none">
+          <span className="inline-block rounded-full bg-[#7D766C] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-md">
+            local
+          </span>
+        </div>
+      )}
       {/* Outer page only: Figma full BG image + soft opacity */}
       <div className="absolute inset-0 z-0 overflow-hidden" style={{ backgroundColor: "#F7F3EE" }}>
         <div
@@ -75,13 +82,21 @@ const LoginPageShell = ({ children, onBrandTap }) => {
                     <img
                       src={clothlynLogo}
                       alt="Clothlyn"
-                      className="h-48 w-auto max-w-[280px] object-contain select-none"
+                      className="h-48 w-auto max-w-[280px] object-contain select-none pointer-events-none"
                       style={{ imageRendering: "auto" }}
                       draggable={false}
                     />
                   </button>
+                  <button
+                    type="button"
+                    className="bg-transparent p-0 border-0 cursor-default"
+                    onClick={onIllustrationTap}
+                    aria-label="Powered by Gelai"
+                  >
+                    <PoweredBy className="mt-2" />
+                  </button>
                   <h2
-                    className="text-xl font-semibold mb-2"
+                    className="text-xl font-semibold mb-2 mt-6"
                     style={{ color: "#0B1C30" }}
                   >
                     24 × 7 Premium Support
@@ -91,14 +106,12 @@ const LoginPageShell = ({ children, onBrandTap }) => {
                     assist you with any queries.
                   </p>
                 </div>
-
-                <PoweredBy className="mt-10 pt-4 shrink-0" />
               </div>
             </div>
 
             <div className="lg:w-2/5 p-8 sm:p-10 bg-transparent">
               <div className="w-full max-w-md mx-auto h-full flex flex-col items-center justify-center gap-6">
-                <div className="lg:hidden mb-2">
+                <div className="lg:hidden mb-2 flex flex-col items-center gap-3">
                   <img
                     src={clothlynLogo}
                     alt="Clothlyn"
@@ -108,6 +121,14 @@ const LoginPageShell = ({ children, onBrandTap }) => {
                     onClick={onBrandTap}
                     role="presentation"
                   />
+                  <button
+                    type="button"
+                    className="bg-transparent p-0 border-0 cursor-default"
+                    onClick={onIllustrationTap}
+                    aria-label="Powered by Gelai"
+                  >
+                    <PoweredBy />
+                  </button>
                 </div>
                 <div
                   className="rounded-3xl p-8 max-w-md w-full border border-[#E8DFD4]/90"
@@ -119,7 +140,6 @@ const LoginPageShell = ({ children, onBrandTap }) => {
                 >
                   {children}
                 </div>
-                <PoweredBy className="lg:hidden mt-2" />
               </div>
             </div>
           </div>

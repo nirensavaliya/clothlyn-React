@@ -6,6 +6,7 @@ import LoginForm from "./LoginForm";
 import OTPVerification from "./OtpVerification";
 import LoginPageShell from "./LoginPageShell";
 import { useLogin } from "../../hooks/useLogin";
+import { enableLocalOtpMode, isLocalOtpMode } from "../../apis/loginApi";
 import LoaderComponent from "../common/Loader";
 
 const DEFAULT_ADMIN_COMPANY =
@@ -14,13 +15,16 @@ const DEFAULT_TENANT_CLIENT_CODE =
   process.env.REACT_APP_DEFAULT_TENANT_CODE || "GI1001";
 const CLIENT_CODE_PATTERN = /^GI[A-Z0-9]{4}$/i;
 const SUPER_ADMIN_TAP_COUNT = 7;
-const SUPER_ADMIN_TAP_RESET_MS = 3000;
+const LOCAL_OTP_TAP_COUNT = 10;
+const TAP_RESET_MS = 3000;
 
 const PLATFORM_CLIENT_CODE = "GI0000";
 
 const LoginComponent = ({ platformLogin = false }) => {
   const navigate = useNavigate();
   const logoTapRef = useRef({ count: 0, timer: null });
+  const illustrationTapRef = useRef({ count: 0, timer: null });
+  const [localOtpEnabled, setLocalOtpEnabled] = useState(() => isLocalOtpMode());
 
   const handleLogoTap = useCallback(() => {
     if (logoTapRef.current.timer) {
@@ -37,8 +41,30 @@ const LoginComponent = ({ platformLogin = false }) => {
     logoTapRef.current.timer = setTimeout(() => {
       logoTapRef.current.count = 0;
       logoTapRef.current.timer = null;
-    }, SUPER_ADMIN_TAP_RESET_MS);
+    }, TAP_RESET_MS);
   }, [navigate]);
+
+  const handleIllustrationTap = useCallback(() => {
+    if (illustrationTapRef.current.timer) {
+      clearTimeout(illustrationTapRef.current.timer);
+    }
+    illustrationTapRef.current.count += 1;
+
+    if (illustrationTapRef.current.count >= LOCAL_OTP_TAP_COUNT) {
+      illustrationTapRef.current.count = 0;
+      enableLocalOtpMode();
+      setLocalOtpEnabled(true);
+      toast.info("Local OTP mode on — OTP will show in response", {
+        toastId: "local-otp-mode",
+      });
+      return;
+    }
+
+    illustrationTapRef.current.timer = setTimeout(() => {
+      illustrationTapRef.current.count = 0;
+      illustrationTapRef.current.timer = null;
+    }, TAP_RESET_MS);
+  }, []);
 
   // Sitaram (GI1001): skip client code — start on phone login (step 2)
   const [isOtherClientFlow, setIsOtherClientFlow] = useState(false);
@@ -186,6 +212,9 @@ const LoginComponent = ({ platformLogin = false }) => {
         try {
           const response = await sendOTP(formData.phoneNumber, formData.clientCode, 'admin');
           setOtpData(response?.data);
+          if (response?.data?.otp) {
+            setFormData((prev) => ({ ...prev, otp: String(response.data.otp) }));
+          }
           setCurrentStep(nextStep);
         } catch (error) {
           setErrors((prev) => ({
@@ -292,7 +321,11 @@ const LoginComponent = ({ platformLogin = false }) => {
   return (
     <>
       {isOTPLoading && <LoaderComponent size={56} />}
-      <LoginPageShell onBrandTap={handleLogoTap}>
+      <LoginPageShell
+        onBrandTap={handleLogoTap}
+        onIllustrationTap={handleIllustrationTap}
+        showLocalBadge={localOtpEnabled}
+      >
         {renderCurrentStep()}
       </LoginPageShell>
     </>

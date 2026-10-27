@@ -84,6 +84,9 @@ const UserLoginForm = ({
       );
 
       setOtpData(response.data);
+      if (response?.data?.otp) {
+        setOtp(String(response.data.otp));
+      }
       setStep(3);
     } catch (error) {
       console.error("Failed to send OTP", error);

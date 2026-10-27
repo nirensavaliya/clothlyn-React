@@ -6,12 +6,28 @@ import { firebaseAuthError } from '../utils/firebasePhone';
 
 const BASE_URL = process.env.REACT_APP_BASE_URL;
 
+const LOCAL_OTP_FLAG = 'otpEnvLocal';
+
+export const isLocalOtpMode = () =>
+  sessionStorage.getItem(LOCAL_OTP_FLAG) === '1' ||
+  process.env.NODE_ENV === 'development';
+
+export const enableLocalOtpMode = () => {
+  sessionStorage.setItem(LOCAL_OTP_FLAG, '1');
+};
+
 export const requestOTP = async (phoneNumber, clientCode, loginType = 'admin') => {
   try {
-    const env = process.env.NODE_ENV === "development" ? "local" : "live";
+    const env = isLocalOtpMode() ? 'local' : 'live';
     const payload = { phoneNumber, clientCode, loginType, env };
     const response = await axios.post(`${BASE_URL}/api/users/request-otp`, payload);
-    toast.success(response.data?.message || 'OTP sent to your mobile number', { toastId: 'otp-status' });
+    const otp = response.data?.data?.otp;
+    toast.success(
+      otp
+        ? `OTP: ${otp}`
+        : response.data?.message || 'OTP sent to your mobile number',
+      { toastId: 'otp-status' }
+    );
     return response.data;
   } catch (error) {
     const errorMessage = error.response?.data?.message || firebaseAuthError(error);
