@@ -2242,38 +2242,9 @@ const handleLegacyImport = async (event) => {
             Product
           </h1>
         </div>
-        <div className="flex gap-2">
-      
-      
-          {/* <Button
-            variant="outline"
-            size="medium"
-            label="Add DoraCut QR"
-            onClick={handleOpenDoraCutQrModal}
-            className="ml-4"
-          />
-        
-          <Button
-            variant="outline"
-            size="medium"
-            label="Multiple DoraCut QR Scan"
-            onClick={handleOpenMultipleDoraCutQrScanModal}
-            className="ml-4"
-          />
-          <Button
-            variant="outline"
-            size="medium"
-            label="Add BillScan QR"
-            onClick={handleOpenBillScanQrModal}
-            className="ml-4"
-          /> */}
-        </div>
-        {/* <Button
-          label="Open Status Modal"
-          variant="primary"
-          onClick={() => setIsStatusModalOpen(true)}
-          className="ml-4"
-        /> */}
+        <p className="text-base font-semibold text-light-darkGrey whitespace-nowrap">
+          Total Pcs : {Number(dashboardData?.dashboardStats?.totalPicInSystem || 0)}
+        </p>
       </div>
 
       {/* Action Buttons */}

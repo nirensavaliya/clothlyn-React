@@ -267,6 +267,21 @@ const buildDashboardExportRows = async (isSample = false, filters = {}) => {
   const worksheet = workbook.Sheets[sheetName];
   let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
+  // BE may prepend "Total Pcs" summary rows — skip so real column headers stay first
+  while (
+    jsonData.length &&
+    String(jsonData[0]?.[0] ?? "").trim().toLowerCase() === "total pcs"
+  ) {
+    jsonData = jsonData.slice(1);
+  }
+  while (
+    jsonData.length &&
+    (!jsonData[0] ||
+      jsonData[0].every((c) => c == null || String(c).trim() === ""))
+  ) {
+    jsonData = jsonData.slice(1);
+  }
+
   const headers = (jsonData[0] || []).map((h) =>
     (h || "").toString().trim().toLowerCase()
   );
@@ -283,9 +298,35 @@ const buildDashboardExportRows = async (isSample = false, filters = {}) => {
   return jsonData;
 };
 
+/** Sum PIC column (supports "64 / 60" or plain number) — same idea as Product Total Pcs */
+const getExportTotalPcs = (jsonData) => {
+  if (!Array.isArray(jsonData) || jsonData.length < 2) return 0;
+  const headers = (jsonData[0] || []).map((h) =>
+    String(h ?? "").trim().toLowerCase()
+  );
+  let picIdx = headers.indexOf("pic");
+  if (picIdx === -1) {
+    picIdx = headers.findIndex((h) => h === "pic" || /^pic\b/.test(h));
+  }
+  if (picIdx === -1) return 0;
+  return jsonData.slice(1).reduce((sum, row) => {
+    const raw = String(row?.[picIdx] ?? "").trim();
+    if (!raw || raw === "-") return sum;
+    const m = raw.match(/-?\d+/);
+    const n = m ? parseInt(m[0], 10) : NaN;
+    return sum + (Number.isFinite(n) ? n : 0);
+  }, 0);
+};
+
 const buildDashboardExcelBlob = (jsonData) => {
+  const totalPcs = getExportTotalPcs(jsonData);
+  const sheetData = [
+    ["Total Pcs", totalPcs],
+    [],
+    ...(Array.isArray(jsonData) ? jsonData : []),
+  ];
   const newWB = XLSX.utils.book_new();
-  const newWS = XLSX.utils.aoa_to_sheet(jsonData);
+  const newWS = XLSX.utils.aoa_to_sheet(sheetData);
   XLSX.utils.book_append_sheet(newWB, newWS, "Product");
   const fileData = XLSX.write(newWB, { bookType: "xlsx", type: "array" });
   return new Blob([fileData], {
@@ -312,6 +353,7 @@ const buildDashboardPdfBlob = async (jsonData) => {
         : String(value);
     })
   );
+  const totalPcs = getExportTotalPcs(jsonData);
 
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
@@ -320,9 +362,12 @@ const buildDashboardPdfBlob = async (jsonData) => {
   doc.setFont("helvetica", "normal");
   doc.text(`Generated on: ${new Date().toLocaleString()}`, 40, 52);
   doc.text(`Total rows: ${body.length}`, 40, 64);
+  doc.setFont("helvetica", "bold");
+  doc.text(`Total Pcs: ${totalPcs}`, 40, 76);
+  doc.setFont("helvetica", "normal");
 
   autoTable(doc, {
-    startY: 78,
+    startY: 90,
     head: [headers],
     body,
     styles: {

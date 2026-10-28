@@ -183,6 +183,23 @@ const AlterCount = () => {
     }
   };
 
+  const formatProcessLabel = (name) => {
+    if (!name) return '-';
+    const raw = String(name).trim();
+    const n = raw.toLowerCase();
+    const map = {
+      rc: 'RC',
+      billscan: 'Bill Scan',
+      doracut: 'DoraCut',
+      packing: 'Packing',
+      checking: 'Checking',
+      press: 'Press',
+      loading: 'Loading',
+    };
+    if (map[n]) return map[n];
+    return raw;
+  };
+
   const columns = useMemo(() => [
     {
       header: 'Lot Number',
@@ -195,6 +212,16 @@ const AlterCount = () => {
       cell: (row) => (
         <span className="font-semibold">{row.alterCount || 0}</span>
       ),
+    },
+    {
+      header: 'Current Status',
+      accessor: 'status',
+      cell: (row) => formatProcessLabel(row.status),
+    },
+    {
+      header: 'Alter From',
+      accessor: 'alterFromProcess',
+      cell: (row) => formatProcessLabel(row.alterFromProcess),
     },
   ], []);
 
